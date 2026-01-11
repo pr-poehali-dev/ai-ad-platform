@@ -2,28 +2,12 @@ import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { Card } from '@/components/ui/card';
-import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
-import { Textarea } from '@/components/ui/textarea';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import Icon from '@/components/ui/icon';
-
-type Listing = {
-  id: number;
-  title: string;
-  price: string;
-  location: string;
-  image: string;
-  seller: {
-    name: string;
-    rating: number;
-    verified: boolean;
-    avatar: string;
-  };
-  category: string;
-  featured: boolean;
-};
+import ListingCard, { type Listing } from '@/components/ListingCard';
+import CreateListingDialog from '@/components/CreateListingDialog';
+import ListingDetailDialog from '@/components/ListingDetailDialog';
+import BottomNavigation from '@/components/BottomNavigation';
 
 const categories = [
   { name: 'Все категории', icon: 'Grid3x3' },
@@ -165,61 +149,11 @@ export default function Index() {
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {filteredListings.map((listing) => (
-                <Card 
-                  key={listing.id} 
-                  className="overflow-hidden cursor-pointer hover:shadow-lg transition-shadow"
+                <ListingCard
+                  key={listing.id}
+                  listing={listing}
                   onClick={() => setSelectedListing(listing)}
-                >
-                  <div className="relative">
-                    <img
-                      src={listing.image}
-                      alt={listing.title}
-                      className="w-full h-48 object-cover"
-                    />
-                    {listing.featured && (
-                      <Badge className="absolute top-3 left-3 bg-accent">
-                        <Icon name="Star" size={14} className="mr-1" />
-                        Топ
-                      </Badge>
-                    )}
-                  </div>
-
-                  <div className="p-4">
-                    <div className="flex items-start justify-between mb-2">
-                      <h3 className="font-semibold text-foreground line-clamp-2">{listing.title}</h3>
-                    </div>
-
-                    <p className="text-2xl font-bold text-primary mb-2">{listing.price}</p>
-
-                    <div className="flex items-center gap-1 text-sm text-muted-foreground mb-3">
-                      <Icon name="MapPin" size={14} />
-                      {listing.location}
-                    </div>
-
-                    <div className="flex items-center gap-2 pt-3 border-t border-border">
-                      <Avatar className="w-8 h-8">
-                        <AvatarFallback className="bg-primary/10 text-primary text-xs">
-                          {listing.seller.avatar}
-                        </AvatarFallback>
-                      </Avatar>
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-1">
-                          <p className="text-sm font-medium truncate">{listing.seller.name}</p>
-                          {listing.seller.verified && (
-                            <Icon name="BadgeCheck" className="text-accent flex-shrink-0" size={16} />
-                          )}
-                        </div>
-                        <div className="flex items-center gap-1">
-                          <Icon name="Star" className="text-yellow-500" size={12} />
-                          <span className="text-xs text-muted-foreground">{listing.seller.rating}</span>
-                        </div>
-                      </div>
-                      <Button size="icon" variant="ghost">
-                        <Icon name="Heart" size={18} />
-                      </Button>
-                    </div>
-                  </div>
-                </Card>
+                />
               ))}
             </div>
           </div>
@@ -329,207 +263,21 @@ export default function Index() {
         </main>
       )}
 
-      <nav className="fixed bottom-0 left-0 right-0 bg-card border-t border-border z-50">
-        <div className="max-w-7xl mx-auto px-2 py-2">
-          <div className="flex items-center justify-around">
-            {[
-              { id: 'home', icon: 'Home', label: 'Главная' },
-              { id: 'search', icon: 'Search', label: 'Поиск' },
-              { id: 'create', icon: 'PlusCircle', label: 'Разместить' },
-              { id: 'favorites', icon: 'Heart', label: 'Избранное' },
-              { id: 'messages', icon: 'MessageCircle', label: 'Чаты' },
-              { id: 'profile', icon: 'User', label: 'Профиль' },
-            ].map((tab) => {
-              if (tab.id === 'create') {
-                return (
-                  <Button
-                    key={tab.id}
-                    variant="default"
-                    size="icon"
-                    className="h-12 w-12 rounded-full"
-                    onClick={() => setCreateDialogOpen(true)}
-                  >
-                    <Icon name={tab.icon as any} size={24} />
-                  </Button>
-                );
-              }
+      <BottomNavigation
+        activeTab={activeTab}
+        onTabChange={setActiveTab}
+        onCreateClick={() => setCreateDialogOpen(true)}
+      />
 
-              return (
-                <Button
-                  key={tab.id}
-                  variant="ghost"
-                  className={`flex flex-col items-center gap-1 h-auto py-2 px-3 ${
-                    activeTab === tab.id ? 'text-primary' : 'text-muted-foreground'
-                  }`}
-                  onClick={() => setActiveTab(tab.id)}
-                >
-                  <Icon name={tab.icon as any} size={22} />
-                  <span className="text-xs">{tab.label}</span>
-                </Button>
-              );
-            })}
-          </div>
-        </div>
-      </nav>
+      <CreateListingDialog
+        open={createDialogOpen}
+        onOpenChange={setCreateDialogOpen}
+      />
 
-      <Dialog open={createDialogOpen} onOpenChange={setCreateDialogOpen}>
-        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <Icon name="Sparkles" className="text-primary" size={24} />
-              Разместить объявление
-            </DialogTitle>
-            <DialogDescription>
-              ИИ поможет создать привлекательное объявление за 60 секунд
-            </DialogDescription>
-          </DialogHeader>
-
-          <div className="space-y-4 py-4">
-            <div>
-              <label className="text-sm font-medium mb-2 block">Категория</label>
-              <Select>
-                <SelectTrigger>
-                  <SelectValue placeholder="Выберите категорию" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="electronics">Электроника</SelectItem>
-                  <SelectItem value="realty">Недвижимость</SelectItem>
-                  <SelectItem value="transport">Транспорт</SelectItem>
-                  <SelectItem value="jobs">Работа</SelectItem>
-                  <SelectItem value="services">Услуги</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div>
-              <label className="text-sm font-medium mb-2 block">Название</label>
-              <Input placeholder="Например: iPhone 15 Pro Max 256GB" />
-              <p className="text-xs text-muted-foreground mt-1 flex items-center gap-1">
-                <Icon name="Sparkles" size={12} />
-                ИИ предложит оптимальное название
-              </p>
-            </div>
-
-            <div>
-              <label className="text-sm font-medium mb-2 block">Описание</label>
-              <Textarea placeholder="Опишите товар или услугу" rows={4} />
-              <p className="text-xs text-muted-foreground mt-1 flex items-center gap-1">
-                <Icon name="Sparkles" size={12} />
-                ИИ улучшит текст и добавит ключевые детали
-              </p>
-            </div>
-
-            <div>
-              <label className="text-sm font-medium mb-2 block">Цена</label>
-              <Input type="number" placeholder="0" />
-              <p className="text-xs text-muted-foreground mt-1 flex items-center gap-1">
-                <Icon name="TrendingUp" size={12} />
-                ИИ подскажет рыночную цену
-              </p>
-            </div>
-
-            <div>
-              <label className="text-sm font-medium mb-2 block">Фото</label>
-              <div className="border-2 border-dashed border-border rounded-lg p-8 text-center">
-                <Icon name="Upload" size={32} className="mx-auto mb-2 text-muted-foreground" />
-                <p className="text-sm text-muted-foreground mb-1">Загрузите фото</p>
-                <p className="text-xs text-muted-foreground">ИИ автоматически улучшит качество</p>
-              </div>
-            </div>
-
-            <Button className="w-full" size="lg">
-              <Icon name="Check" className="mr-2" size={18} />
-              Опубликовать объявление
-            </Button>
-          </div>
-        </DialogContent>
-      </Dialog>
-
-      <Dialog open={!!selectedListing} onOpenChange={() => setSelectedListing(null)}>
-        <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
-          {selectedListing && (
-            <>
-              <div className="relative -mx-6 -mt-6">
-                <img
-                  src={selectedListing.image}
-                  alt={selectedListing.title}
-                  className="w-full h-64 object-cover"
-                />
-                {selectedListing.featured && (
-                  <Badge className="absolute top-4 left-4 bg-accent">
-                    <Icon name="Star" size={14} className="mr-1" />
-                    Топ объявление
-                  </Badge>
-                )}
-              </div>
-
-              <div className="space-y-4 py-4">
-                <div>
-                  <h2 className="text-2xl font-bold mb-2">{selectedListing.title}</h2>
-                  <p className="text-3xl font-bold text-primary">{selectedListing.price}</p>
-                </div>
-
-                <div className="flex items-center gap-2 text-muted-foreground">
-                  <Icon name="MapPin" size={18} />
-                  <span>{selectedListing.location}</span>
-                </div>
-
-                <div className="bg-secondary/30 rounded-lg p-4">
-                  <div className="flex items-center gap-3 mb-3">
-                    <Avatar className="w-12 h-12">
-                      <AvatarFallback className="bg-primary text-primary-foreground">
-                        {selectedListing.seller.avatar}
-                      </AvatarFallback>
-                    </Avatar>
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2 mb-1">
-                        <h3 className="font-semibold">{selectedListing.seller.name}</h3>
-                        {selectedListing.seller.verified && (
-                          <Icon name="BadgeCheck" className="text-accent" size={18} />
-                        )}
-                      </div>
-                      <div className="flex items-center gap-1">
-                        <Icon name="Star" className="text-yellow-500" size={14} />
-                        <span className="text-sm font-semibold">{selectedListing.seller.rating}</span>
-                        <span className="text-sm text-muted-foreground">(98 отзывов)</span>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="flex gap-2">
-                    <Button className="flex-1" size="lg">
-                      <Icon name="MessageCircle" className="mr-2" size={18} />
-                      Написать
-                    </Button>
-                    <Button variant="outline" size="icon" className="h-11 w-11">
-                      <Icon name="Phone" size={18} />
-                    </Button>
-                    <Button variant="outline" size="icon" className="h-11 w-11">
-                      <Icon name="Heart" size={18} />
-                    </Button>
-                  </div>
-                </div>
-
-                <div>
-                  <h3 className="font-semibold mb-2">Описание</h3>
-                  <p className="text-muted-foreground">
-                    В отличном состоянии, все документы в порядке. Проверено сервисной службой.
-                    Дополнительная информация по запросу.
-                  </p>
-                </div>
-
-                <div className="flex items-center gap-2 p-3 bg-primary/5 rounded-lg border border-primary/20">
-                  <Icon name="ShieldCheck" className="text-primary" size={20} />
-                  <div className="flex-1">
-                    <p className="text-sm font-medium">Проверено ИИ</p>
-                    <p className="text-xs text-muted-foreground">Объявление прошло проверку на достоверность</p>
-                  </div>
-                </div>
-              </div>
-            </>
-          )}
-        </DialogContent>
-      </Dialog>
+      <ListingDetailDialog
+        listing={selectedListing}
+        onClose={() => setSelectedListing(null)}
+      />
     </div>
   );
 }
