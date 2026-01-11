@@ -95,26 +95,27 @@ export default function Index() {
   });
 
   return (
-    <div className="min-h-screen bg-background pb-20">
-      <header className="bg-card border-b border-border sticky top-0 z-50 shadow-sm">
+    <div className="min-h-screen bg-background pb-20 overflow-x-hidden">
+      <header className="bg-card/80 backdrop-blur-glass border-b border-border/50 sticky top-0 z-50 shadow-sm">
         <div className="max-w-7xl mx-auto px-4 py-4">
           <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center gap-2">
-              <div className="w-10 h-10 bg-primary rounded-xl flex items-center justify-center">
+            <div className="flex items-center gap-3">
+              <div className="w-11 h-11 bg-gradient-to-br from-primary to-accent rounded-2xl flex items-center justify-center shadow-lg shadow-primary/20">
                 <Icon name="Megaphone" className="text-primary-foreground" size={24} />
               </div>
-              <h1 className="text-xl font-bold text-foreground">Объявления</h1>
+              <h1 className="text-xl font-bold text-foreground tracking-tight">Объявления</h1>
             </div>
-            <Button variant="ghost" size="icon">
+            <Button variant="ghost" size="icon" className="relative hover:bg-primary/10">
               <Icon name="Bell" size={22} />
+              <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full"></span>
             </Button>
           </div>
 
           <div className="relative">
-            <Icon name="Search" className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" size={20} />
+            <Icon name="Search" className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground" size={20} />
             <Input
-              placeholder="Поиск объявлений..."
-              className="pl-10 h-11"
+              placeholder="Поиск товаров, услуг..."
+              className="pl-11 h-12 rounded-2xl border-border/50 focus-visible:ring-2 focus-visible:ring-primary/20 bg-secondary/30"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
             />
@@ -123,13 +124,18 @@ export default function Index() {
       </header>
 
       {activeTab === 'home' && (
-        <main className="max-w-7xl mx-auto px-4 py-6">
+        <main className="max-w-7xl mx-auto px-4 py-6 animate-fade-in">
           <div className="flex gap-2 overflow-x-auto pb-4 mb-6 scrollbar-hide">
-            {categories.map((cat) => (
+            {categories.map((cat, idx) => (
               <Button
                 key={cat.name}
                 variant={selectedCategory === cat.name ? 'default' : 'outline'}
-                className="flex-shrink-0 gap-2"
+                className={`flex-shrink-0 gap-2 rounded-full transition-all duration-300 ${
+                  selectedCategory === cat.name 
+                    ? 'shadow-lg shadow-primary/25' 
+                    : 'hover:shadow-md hover:border-primary/50'
+                }`}
+                style={{ animationDelay: `${idx * 50}ms` }}
                 onClick={() => setSelectedCategory(cat.name)}
               >
                 <Icon name={cat.icon as any} size={18} />
@@ -139,15 +145,15 @@ export default function Index() {
           </div>
 
           <div className="mb-6">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-semibold">Рекомендации для вас</h2>
-              <Badge variant="secondary" className="gap-1">
-                <Icon name="Sparkles" size={14} />
-                ИИ подбор
+            <div className="flex items-center justify-between mb-5">
+              <h2 className="text-xl font-bold tracking-tight">Рекомендации для вас</h2>
+              <Badge variant="secondary" className="gap-1.5 rounded-full px-3 py-1.5 bg-gradient-to-r from-primary/10 to-accent/10 border-0">
+                <Icon name="Sparkles" size={15} className="text-primary" />
+                <span className="text-xs font-semibold">ИИ подбор</span>
               </Badge>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
               {filteredListings.map((listing) => (
                 <ListingCard
                   key={listing.id}
@@ -161,72 +167,78 @@ export default function Index() {
       )}
 
       {activeTab === 'search' && (
-        <main className="max-w-7xl mx-auto px-4 py-6">
+        <main className="max-w-7xl mx-auto px-4 py-6 animate-fade-in">
           <h2 className="text-2xl font-bold mb-6">Поиск и фильтры</h2>
-          <div className="text-center py-12 text-muted-foreground">
-            <Icon name="Search" size={48} className="mx-auto mb-4 opacity-50" />
-            <p>Расширенный поиск в разработке</p>
+          <div className="text-center py-20 text-muted-foreground">
+            <div className="w-24 h-24 mx-auto mb-6 rounded-full bg-secondary/50 flex items-center justify-center">
+              <Icon name="Search" size={48} className="opacity-50" />
+            </div>
+            <p className="text-lg">Расширенный поиск в разработке</p>
           </div>
         </main>
       )}
 
       {activeTab === 'favorites' && (
-        <main className="max-w-7xl mx-auto px-4 py-6">
+        <main className="max-w-7xl mx-auto px-4 py-6 animate-fade-in">
           <h2 className="text-2xl font-bold mb-6">Избранное</h2>
-          <div className="text-center py-12 text-muted-foreground">
-            <Icon name="Heart" size={48} className="mx-auto mb-4 opacity-50" />
-            <p>Сохраняйте понравившиеся объявления</p>
+          <div className="text-center py-20 text-muted-foreground">
+            <div className="w-24 h-24 mx-auto mb-6 rounded-full bg-red-50 flex items-center justify-center">
+              <Icon name="Heart" size={48} className="opacity-50 text-red-400" />
+            </div>
+            <p className="text-lg">Сохраняйте понравившиеся объявления</p>
           </div>
         </main>
       )}
 
       {activeTab === 'messages' && (
-        <main className="max-w-7xl mx-auto px-4 py-6">
+        <main className="max-w-7xl mx-auto px-4 py-6 animate-fade-in">
           <h2 className="text-2xl font-bold mb-6">Сообщения</h2>
-          <div className="text-center py-12 text-muted-foreground">
-            <Icon name="MessageCircle" size={48} className="mx-auto mb-4 opacity-50" />
-            <p>Здесь будут ваши диалоги с продавцами</p>
+          <div className="text-center py-20 text-muted-foreground">
+            <div className="w-24 h-24 mx-auto mb-6 rounded-full bg-blue-50 flex items-center justify-center">
+              <Icon name="MessageCircle" size={48} className="opacity-50 text-blue-400" />
+            </div>
+            <p className="text-lg">Здесь будут ваши диалоги с продавцами</p>
           </div>
         </main>
       )}
 
       {activeTab === 'profile' && (
-        <main className="max-w-7xl mx-auto px-4 py-6">
+        <main className="max-w-7xl mx-auto px-4 py-6 animate-fade-in">
           <div className="max-w-2xl mx-auto">
-            <div className="bg-card rounded-xl p-6 mb-6 border border-border">
+            <div className="bg-card rounded-2xl p-6 mb-6 border-0 shadow-lg">
               <div className="flex items-center gap-4 mb-6">
-                <Avatar className="w-20 h-20">
-                  <AvatarFallback className="bg-primary text-primary-foreground text-2xl">ИП</AvatarFallback>
+                <Avatar className="w-24 h-24 ring-4 ring-primary/10">
+                  <AvatarFallback className="bg-gradient-to-br from-primary to-accent text-primary-foreground text-3xl font-bold">ИП</AvatarFallback>
                 </Avatar>
                 <div className="flex-1">
-                  <div className="flex items-center gap-2 mb-1">
-                    <h2 className="text-xl font-bold">Иван Петров</h2>
-                    <Icon name="BadgeCheck" className="text-accent" size={20} />
+                  <div className="flex items-center gap-2 mb-2">
+                    <h2 className="text-2xl font-bold">Иван Петров</h2>
+                    <Icon name="BadgeCheck" className="text-accent" size={22} />
                   </div>
-                  <div className="flex items-center gap-1 text-muted-foreground">
-                    <Icon name="Star" className="text-yellow-500" size={16} />
-                    <span className="font-semibold">4.9</span>
-                    <span className="text-sm">(127 отзывов)</span>
+                  <div className="flex items-center gap-1.5">
+                    <Icon name="Star" className="text-yellow-500 fill-yellow-500" size={18} />
+                    <span className="font-bold text-lg">4.9</span>
+                    <span className="text-sm text-muted-foreground">(127 отзывов)</span>
                   </div>
                 </div>
               </div>
 
               <div className="grid grid-cols-3 gap-4 mb-6">
-                <div className="text-center">
-                  <p className="text-2xl font-bold text-primary">24</p>
-                  <p className="text-sm text-muted-foreground">Объявления</p>
+                <div className="text-center p-3 rounded-xl bg-gradient-to-br from-primary/5 to-primary/10">
+                  <p className="text-3xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">24</p>
+                  <p className="text-xs font-medium text-muted-foreground mt-1">Объявления</p>
                 </div>
-                <div className="text-center">
-                  <p className="text-2xl font-bold text-primary">156</p>
-                  <p className="text-sm text-muted-foreground">Продано</p>
+                <div className="text-center p-3 rounded-xl bg-gradient-to-br from-accent/5 to-accent/10">
+                  <p className="text-3xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">156</p>
+                  <p className="text-xs font-medium text-muted-foreground mt-1">Продано</p>
                 </div>
-                <div className="text-center">
-                  <p className="text-2xl font-bold text-primary">98%</p>
-                  <p className="text-sm text-muted-foreground">Рейтинг</p>
+                <div className="text-center p-3 rounded-xl bg-gradient-to-br from-green-50 to-green-100">
+                  <p className="text-3xl font-bold text-green-600">98%</p>
+                  <p className="text-xs font-medium text-muted-foreground mt-1">Рейтинг</p>
                 </div>
               </div>
 
-              <Button className="w-full" size="lg">
+              <Button className="w-full shadow-lg shadow-primary/20" size="lg">
                 <Icon name="Settings" className="mr-2" size={18} />
                 Настройки профиля
               </Button>
